@@ -2172,7 +2172,6 @@ function! s:DB_DB2_execSql(str,...)
         redir END
 
         let dbext_bin = s:DB_fullPath2Bin(dbext#DB_getWType("bin"))
-        echo "lala"
         let cmd = dbext_bin .  ' ' . dbext#DB_getWType("cmd_options")
         if a:0==1
             let cmd = dbext_bin . ' -q del -s off'
@@ -2330,7 +2329,7 @@ endfunction
 
 function! s:DB_DB2_stripHeaderFooter(result)
     if dbext#DB_getWType("use_db2batch") == '1'
-        let stripped = a:result
+        let stripped = substitute(a:result,'|','','g')
         " Strip off column headers ending with a newline
         "let stripped = substitute( a:result, '\_.*-\s*'."[\<C-J>]", '', '' )
         "" Strip off trailing spaces
