@@ -2113,7 +2113,7 @@ function! s:DB_ASE_getDictionaryView() "{{{
 endfunction "}}}
 "}}}
 " DB2 exec {{{
-function! s:DB_DB2_execSql(str)
+function! s:DB_DB2_execSql(str,...)
     " To create a connection to a DB2 server running on a different machine
     " you must start db2cmd.exe and issue the following:
     "         In the case below host_name is the name of remote machine
@@ -2172,8 +2172,11 @@ function! s:DB_DB2_execSql(str)
         redir END
 
         let dbext_bin = s:DB_fullPath2Bin(dbext#DB_getWType("bin"))
-
+        echo "lala"
         let cmd = dbext_bin .  ' ' . dbext#DB_getWType("cmd_options")
+        if a:0==1
+            let cmd = dbext_bin . ' -q del -s off'
+        endif
         if s:DB_get("user") != ""
             let cmd = cmd . ' -a ' . s:DB_get("user") . '/' .
                         \ s:DB_get("passwd") . ' '
@@ -2321,7 +2324,7 @@ function! s:DB_DB2_getListColumn(table_name)
     endif
     let query = query .
                 \ " order by colno"
-    let result = s:DB_DB2_execSql( query )
+    let result = s:DB_DB2_execSql( query, 1)
     return s:DB_DB2_stripHeaderFooter(result)
 endfunction
 
@@ -2354,7 +2357,7 @@ function! s:DB_DB2_getDictionaryTable()
                 \ "       CAST(tabname AS VARCHAR(40)) AS tabschema_tabname " .
                 \ "  from syscat.tables " .
                 \ " order by ".(s:DB_get('dict_show_owner')==1?"tabschema, ":'')."tabname"
-                \ )
+                \ ,1)
     return s:DB_DB2_stripHeaderFooter(result)
 endfunction
 
@@ -2364,7 +2367,7 @@ function! s:DB_DB2_getDictionaryProcedure()
                 \ "       CAST(procname AS VARCHAR(40)) AS procschema_procname " .
                 \ "  from syscat.procedures " .
                 \ " order by ".(s:DB_get('dict_show_owner')==1?"procschema, ":'')."procname"
-                \ )
+                \ ,1)
     return s:DB_DB2_stripHeaderFooter(result)
 endfunction
 
@@ -2374,7 +2377,7 @@ function! s:DB_DB2_getDictionaryView()
                 \ "       CAST(viewname AS VARCHAR(40)) AS viewschema_viewname " .
                 \ "  from syscat.views " .
                 \ " order by ".(s:DB_get('dict_show_owner')==1?"viewschema, ":'')."viewname"
-                \ )
+                \ ,1)
     return s:DB_DB2_stripHeaderFooter(result)
 endfunction
 "}}}
