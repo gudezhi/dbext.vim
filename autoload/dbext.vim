@@ -308,7 +308,7 @@ function! s:DB_buildLists()
     " Check if we are using Cygwin, if so, let the user override
     " the temporary filename to use backslashes
     if has('win32unix') && s:DB_get('use_win32_filenames') == 1
-        let l:dbext_tempfile = system('cygpath -w '.s:dbext_tempfile)
+        let l:dbext_tempfile = s:IconvSystem('cygpath -w '.s:dbext_tempfile)
         if v:shell_error 
             call s:DB_warningMsg('dbext:Failed to convert Cygwin path:'.v:errmsg)
         else
@@ -5640,6 +5640,15 @@ function! s:DB_getObjectAndQuote(object) "{{{
     
     return object
 endfunction "}}}
+func! s:IconvSystem(cmd)
+    let result = system(a:cmd)
+    if exists('*iconv') && has('multi_byte')
+        if(strlen(&tenc) && &tenc != &enc)
+            let result = iconv(result, &tenc, &enc)
+        endif
+    endif
+    return result
+endf
 "}}}
 " Dictionary (Completion) Functions {{{
 function! s:DB_addBufDictList( buf_nbr ) "{{{
@@ -6179,7 +6188,7 @@ function! s:DB_runCmd(cmd, sql, result)
         endif
 
         if a:result == ""
-            let result = system(a:cmd)
+            let result = s:IconvSystem(a:cmd)
         else
             let result = a:result
         endif
@@ -6252,7 +6261,7 @@ function! s:DB_runCmd(cmd, sql, result)
         endif 
 
         if a:result == ""
-            let result = system(a:cmd)
+            let result = s:IconvSystem(a:cmd)
         elseif a:result == "DBI:"
             perl db_results_variable()
             let result = g:dbext_dbi_result
